@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use nannou::{prelude::*, glam::XY};
+use nannou::{prelude::*, state::Mouse};
 
 const HEX_SIZE: f32 = 0.57;
 
@@ -56,6 +56,11 @@ fn outer_region_of(position: IVec2) -> Option<u8> {
     }
 }
 
+fn viewport_size(app: &App) -> f32 {
+    let window_bounds = app.main_window().rect();
+    f32::min(window_bounds.w(), window_bounds.h()) / 2.
+}
+
 /// Board is a 2d representation of the hexagonal grid, where the horizontal component remains as is
 /// and the "vertical" component is the rightward shearing line. The leftward shearing line can be
 /// represented using left diagonal lines drawn through the "gridlines". Right diagnonal lines
@@ -97,10 +102,10 @@ impl Board {
     const BASE_SPACING: f32 = 0.04;
     const WIDTH: f32 = (HEX_SIZE - Self::BASE_SPACING * 4.5) / 9.0;
     const SPACING: f32 = Self::BASE_SPACING + Self::WIDTH * 2.0;
-    
+
     pub fn bases() -> (Vec2, Vec2) {
         let unit = Vec2::new(Self::SPACING, 0.0);
-        (unit,unit.rotate(f32::FRAC_PI_3()))
+        (unit, unit.rotate(f32::FRAC_PI_3()))
     }
 
     pub fn draw(&self, draw: &Draw) {
@@ -116,11 +121,15 @@ impl Board {
         }
     }
 
-    /// Reverses the screen position (say, of the cursor) into a position on the board, if the
-    /// position is within bounds.
-    pub fn position_of(point: Point2) -> Option<IVec2> {
-        // let predicted_point = 
-        todo!()
+    /// Converts the screen position (say, of the cursor) into a position on the board, if the
+    /// position is within the board's bounds.
+    pub fn position_of(&self, mouse: &Mouse, scale: f32) -> Option<IVec2> {
+        let (bx, by) = Self::bases();
+        let inverter = mat2(bx, by).inverse();
+        let predicted_f32 = inverter * (mouse.position() / scale) + Point2::ONE / 2.;
+        let predicted = predicted_f32.floor().as_i32();
+
+        self.backing.contains_key(&predicted).then_some(predicted)
     }
 }
 
@@ -142,8 +151,7 @@ fn model(_: &App) -> Model {
 }
 
 fn window_handler(app: &App, m: &Model, f: Frame) {
-    let window_bounds = app.main_window().rect();
-    let viewport_size = f32::min(window_bounds.w(), window_bounds.h()) / 2.;
+    let viewport_size = viewport_size(app);
 
     f.clear(ANTIQUEWHITE);
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
@@ -152,8 +160,9 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     draw.to_frame(app, &f).unwrap();
 }
 
-fn update(app: &App, _: &mut Model, _: Update) {
-    dbg!(&app.mouse);
+fn update(app: &App, m: &mut Model, _: Update) {
+    let viewport_size = viewport_size(app);
+    let position = m.board.position_of(&app.mouse, viewport_size);
 }
 
 fn draw_board(draw: &Draw) {
