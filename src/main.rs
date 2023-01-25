@@ -76,13 +76,21 @@ impl Default for Board {
     fn default() -> Self {
         Self {
             backing: {
-                let center = (-4..=4)
-                    .flat_map(|x| {
-                        (dbg!(max(-x - 4, -4))..dbg!(min(5 - x, 5))).map(move |u| (dbg!(x), u))
-                    })
-                    .map(|(a, b)| (IVec2::new(a, b), Player::None))
-                    .collect();
+                let center = (-4..5)
+                    .cartesian_product(-4..5)
+                    .map(|(a, b)| IVec2::new(a, b));
+                let following_y = (5..9)
+                    .flat_map(|y| (-4..(5 - y)).map(move |x| IVec2::new(x, y)))
+                    .flat_map(|v| [v, -v]);
+                let following_x = (5..9)
+                    .flat_map(|x| (-4..(5 - x)).map(move |y| IVec2::new(x, y)))
+                    .flat_map(|v| [v, -v]);
+
                 center
+                    .chain(following_y)
+                    .chain(following_x)
+                    .map(|v| (v, Player::None))
+                    .collect()
             },
         }
     }
