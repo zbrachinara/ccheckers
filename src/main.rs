@@ -3,13 +3,25 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use nannou::prelude::*;
 
-const HEX_SIZE: f32 = 0.4;
+const HEX_SIZE: f32 = 0.6;
 
+#[derive(Copy, Clone)]
 enum Player {
     None,
     Player1,
     Player2,
     Player3,
+}
+
+impl From<Player> for Rgb<u8> {
+    fn from(value: Player) -> Self {
+        match value {
+            Player::None => DARKSLATEGRAY,
+            Player::Player1 => DARKORCHID,
+            Player::Player2 => FUCHSIA,
+            Player::Player3 => HONEYDEW,
+        }
+    }
 }
 
 /// Board is a 2d representation of the hexagonal grid, where the horizontal component remains as is
@@ -28,13 +40,29 @@ struct Board {
 impl Default for Board {
     fn default() -> Self {
         Self {
-            backing: Default::default(),
+            backing: (-4..=4).map(|x| (IVec2::new(x, 0), Player::None)).collect(),
         }
     }
 }
 
 impl Board {
-    pub fn draw(&self, draw: &Draw) {}
+    pub fn draw(&self, draw: &Draw) {
+        let base_spacing = 0.04;
+        let width = (HEX_SIZE - base_spacing * 5.0) / 9.0;
+        let spacing = base_spacing + width * 2.0;
+
+        let bx = pt2(spacing, 0.0);
+        let by = pt2(spacing / 2.0, spacing / 2.0);
+
+        for (pos, state) in &self.backing {
+            let physical_position = bx * pos.x as f32 + by * pos.y as f32;
+            draw.ellipse()
+                .color(Rgb::<u8>::from(*state))
+                .x_y(physical_position.x, physical_position.y)
+                .radius(width)
+                .finish();
+        }
+    }
 }
 
 #[derive(Default)]
@@ -50,13 +78,14 @@ fn model(_: &App) -> Model {
     Model::default()
 }
 
-fn window_handler(app: &App, _: &Model, f: Frame) {
+fn window_handler(app: &App, m: &Model, f: Frame) {
     let window_bounds = app.main_window().rect();
     let viewport_size = f32::min(window_bounds.w(), window_bounds.h()) / 2.;
 
     f.clear(ANTIQUEWHITE);
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
     draw_board(&draw);
+    m.board.draw(&draw);
     draw.to_frame(app, &f).unwrap();
 }
 
