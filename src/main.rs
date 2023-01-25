@@ -5,20 +5,19 @@ struct Model {
 }
 
 fn main() {
-    // nannou::sketch().simple_window(window_handler).run()
-    nannou::sketch(window_handler).run();
+    nannou::app(model).simple_window(window_handler).run()
+    // nannou::sketch(window_handler).run();
 }
 
-fn model(app: &App) -> Model {
+fn model(_: &App) -> Model {
     Model {}
 }
 
-fn window_handler(app: &App, f: Frame) {
+fn window_handler(app: &App, _: &Model, f: Frame) {
 
     f.clear(ANTIQUEWHITE);
 
     let draw = app.draw();
-    // draw.tri().color(STEELBLUE).points(pt2(10., 10.), pt2(-10., 10.), pt2(0., -10.)).finish();
     draw_board(&draw);
 
     draw.to_frame(app, &f).unwrap();
