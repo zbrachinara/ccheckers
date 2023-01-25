@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use nannou::prelude::*;
 
+const HEX_SIZE: f32 = 0.4;
+
 enum Player {
     None,
     Player1,
@@ -14,10 +16,10 @@ enum Player {
 /// and the "vertical" component is the rightward shearing line. The leftward shearing line can be
 /// represented using left diagonal lines drawn through the "gridlines". Right diagnonal lines
 /// should *not* be used for any purpose regarding "local" (regarding neighboring cells) behavior.
-/// 
+///
 /// The center of the coordinate system refers to the cell in the direct center of the board. From
 /// there, the point (0, 4) is in the top right corner within the central hexagon, while (0, -4) is
-/// in the bottom left corner of the hexagon. Similarly, the point at (4, 0) is at the right, while 
+/// in the bottom left corner of the hexagon. Similarly, the point at (4, 0) is at the right, while
 /// (-4, 0) is in the left. By this, the top left is at (-4, 4) and the bottom right is at (4, -4)
 struct Board {
     backing: HashMap<IVec2, Player>,
@@ -25,14 +27,14 @@ struct Board {
 
 impl Default for Board {
     fn default() -> Self {
-        Self { backing: Default::default() }
+        Self {
+            backing: Default::default(),
+        }
     }
 }
 
 impl Board {
-    pub fn draw(&self, draw: &Draw) {
-
-    }
+    pub fn draw(&self, draw: &Draw) {}
 }
 
 #[derive(Default)]
@@ -59,11 +61,9 @@ fn window_handler(app: &App, _: &Model, f: Frame) {
 }
 
 fn draw_board(draw: &Draw) {
-    let hex_size = 0.4;
     let hex_coords = (0..)
         .map(|i| f32::PI() * i as f32 / 3.0)
-        .map(|rad| pt2(rad.cos(), rad.sin()) * hex_size);
-        
+        .map(|rad| pt2(rad.cos(), rad.sin()) * HEX_SIZE);
 
     let hex = hex_coords.clone().take(6);
     draw.polygon().points(hex);
