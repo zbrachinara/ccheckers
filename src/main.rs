@@ -91,7 +91,7 @@ impl Default for Board {
 impl Board {
     pub fn draw(&self, draw: &Draw) {
         let base_spacing = 0.04;
-        let width = (HEX_SIZE - base_spacing * 5.0) / 9.0;
+        let width = (HEX_SIZE - base_spacing * 4.5) / 9.0;
         let spacing = base_spacing + width * 2.0;
 
         let bx = pt2(spacing, 0.0);
