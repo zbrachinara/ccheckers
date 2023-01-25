@@ -1,10 +1,7 @@
-use std::{
-    cmp::{max, min},
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 use itertools::Itertools;
-use nannou::prelude::*;
+use nannou::{prelude::*, glam::XY};
 
 const HEX_SIZE: f32 = 0.57;
 
@@ -97,35 +94,47 @@ impl Default for Board {
 }
 
 impl Board {
-    pub fn draw(&self, draw: &Draw) {
-        let base_spacing = 0.04;
-        let width = (HEX_SIZE - base_spacing * 4.5) / 9.0;
-        let spacing = base_spacing + width * 2.0;
+    const BASE_SPACING: f32 = 0.04;
+    const WIDTH: f32 = (HEX_SIZE - Self::BASE_SPACING * 4.5) / 9.0;
+    const SPACING: f32 = Self::BASE_SPACING + Self::WIDTH * 2.0;
+    
+    pub fn bases() -> (Vec2, Vec2) {
+        let unit = Vec2::new(Self::SPACING, 0.0);
+        (unit,unit.rotate(f32::FRAC_PI_3()))
+    }
 
-        let bx = pt2(spacing, 0.0);
-        let by = pt2(
-            spacing * f32::FRAC_PI_3().cos(),
-            spacing * f32::FRAC_PI_3().sin(),
-        );
+    pub fn draw(&self, draw: &Draw) {
+        let (bx, by) = Self::bases();
 
         for (pos, state) in &self.backing {
             let physical_position = bx * pos.x as f32 + by * pos.y as f32;
             draw.ellipse()
                 .color(Rgb::<u8>::from(*state))
                 .x_y(physical_position.x, physical_position.y)
-                .radius(width)
+                .radius(Self::WIDTH)
                 .finish();
         }
+    }
+
+    /// Reverses the screen position (say, of the cursor) into a position on the board, if the
+    /// position is within bounds.
+    pub fn position_of(point: Point2) -> Option<IVec2> {
+        // let predicted_point = 
+        todo!()
     }
 }
 
 #[derive(Default)]
 struct Model {
     board: Board,
+    path: Vec<IVec2>,
 }
 
 fn main() {
-    nannou::app(model).simple_window(window_handler).run()
+    nannou::app(model)
+        .simple_window(window_handler)
+        .update(update)
+        .run()
 }
 
 fn model(_: &App) -> Model {
@@ -141,6 +150,10 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     draw_board(&draw);
     m.board.draw(&draw);
     draw.to_frame(app, &f).unwrap();
+}
+
+fn update(app: &App, _: &mut Model, _: Update) {
+    dbg!(&app.mouse);
 }
 
 fn draw_board(draw: &Draw) {
