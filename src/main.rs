@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    cmp::{max, min},
+    collections::HashMap,
+};
 
 use itertools::Itertools;
 use nannou::prelude::*;
@@ -40,7 +43,15 @@ struct Board {
 impl Default for Board {
     fn default() -> Self {
         Self {
-            backing: (-4..=4).map(|x| (IVec2::new(x, 0), Player::None)).collect(),
+            backing: {
+                let center = (-4..=4)
+                    .flat_map(|x| {
+                        (dbg!(max(-x - 4, -4))..dbg!(min(5 - x, 5))).map(move |u| (dbg!(x), u))
+                    })
+                    .map(|(a, b)| (IVec2::new(a, b), Player::None))
+                    .collect();
+                center
+            },
         }
     }
 }
@@ -52,7 +63,10 @@ impl Board {
         let spacing = base_spacing + width * 2.0;
 
         let bx = pt2(spacing, 0.0);
-        let by = pt2(spacing / 2.0, spacing / 2.0);
+        let by = pt2(
+            spacing * f32::FRAC_PI_3().cos(),
+            spacing * f32::FRAC_PI_3().sin(),
+        );
 
         for (pos, state) in &self.backing {
             let physical_position = bx * pos.x as f32 + by * pos.y as f32;
