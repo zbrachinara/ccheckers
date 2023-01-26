@@ -156,6 +156,12 @@ fn events(app: &App, m: &mut Model, e: Event) {
                 m.turn = m.mode.next_turn(m.turn)
             }
         }
+        Event::WindowEvent {
+            simple: Some(WindowEvent::KeyPressed(Key::Left)),
+            ..
+        } => {
+            m.path.pop();
+        }
         _ => (),
     }
 }
