@@ -1,9 +1,7 @@
 use nannou::prelude::*;
 
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Mode {
-    #[default]
-    None,
     Two,
     Three,
 }

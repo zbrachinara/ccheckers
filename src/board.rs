@@ -85,7 +85,35 @@ impl Board {
         ]
     }
 
-    pub fn fill(&mut self, mode: Mode) {}
+    fn fill_area(&mut self, positions: impl Iterator<Item = IVec2>, piece: Player) {
+        for p in positions {
+            *self.backing.get_mut(&p).unwrap() = piece;
+        }
+    }
+
+    pub fn fill(&mut self, mode: Mode) {
+        match mode {
+            Mode::Two => {
+                self.fill_area(
+                    Self::region_1()
+                        .chain(Self::region_2())
+                        .chain(Self::region_3()),
+                    Player::Player1,
+                );
+                self.fill_area(
+                    Self::region_4()
+                        .chain(Self::region_5())
+                        .chain(Self::region_6()),
+                    Player::Player2,
+                );
+            }
+            Mode::Three => {
+                self.fill_area(Self::region_1().chain(Self::region_2()), Player::Player1);
+                self.fill_area(Self::region_3().chain(Self::region_4()), Player::Player2);
+                self.fill_area(Self::region_5().chain(Self::region_6()), Player::Player3);
+            },
+        }
+    }
 
     pub fn draw(&self, draw: &Draw) {
         let (bx, by) = Self::bases();
