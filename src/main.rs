@@ -58,6 +58,7 @@ struct Model {
     turn: Player,
     egui: Egui,
     egui_data: EguiData,
+    mode: Mode,
 }
 
 fn main() {
@@ -79,6 +80,7 @@ fn model(app: &App) -> Model {
         turn: Default::default(),
         egui: Egui::from_window(&window),
         egui_data: Default::default(),
+        mode: Default::default(),
     }
 }
 
@@ -106,7 +108,12 @@ fn update(_app: &App, model: &mut Model, update: Update) {
                 for mode in Mode::iter() {
                     ui.selectable_value(&mut model.egui_data.mode, mode, format!("{mode}"));
                 }
-            })
+            });
+        if ui.button("Reset field").clicked() {
+            model.mode = model.egui_data.mode;
+            model.board.fill(model.mode);
+            model.turn = Player::Player1;
+        }
     });
 }
 
