@@ -5,8 +5,9 @@ use nannou::{prelude::*, state::Mouse};
 
 const HEX_SIZE: f32 = 0.57;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 enum Player {
+    #[default]
     None,
     Player1,
     Player2,
@@ -131,12 +132,21 @@ impl Board {
 
         self.backing.contains_key(&predicted).then_some(predicted)
     }
+
+    pub fn contains(&self, position: &IVec2) -> bool {
+        self.backing.contains_key(position)
+    }
+
+    pub fn get(&self, position: &IVec2) -> Option<Player> {
+        self.backing.get(position).copied()
+    }
 }
 
 #[derive(Default)]
 struct Model {
     board: Board,
     path: Vec<IVec2>,
+    turn: Player,
 }
 
 fn main() {
@@ -166,9 +176,15 @@ fn update(app: &App, m: &mut Model, e: Event) {
         Event::WindowEvent {
             simple: Some(WindowEvent::MousePressed(btn)),
             ..
-        } => if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
-            // TODO check valid move and then use position 
-        },
+        } => {
+            if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
+                let legal = if m.path.is_empty() {
+                    m.board.get(&position).map(|p| p == m.turn).unwrap_or(false)
+                } else {
+                    todo!("Check if this position is a neighbor or a neighbor of an occupied neighbor")
+                };
+            }
+        }
         _ => (),
     }
 }
