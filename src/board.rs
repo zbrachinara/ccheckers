@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use nannou::{prelude::*, state::Mouse};
 
-use crate::{player::Player, HEX_SIZE};
+use crate::{
+    player::{Mode, Player},
+    HEX_SIZE,
+};
 
 /// Board is a 2d representation of the hexagonal grid, where the horizontal component remains as is
 /// and the "vertical" component is the rightward shearing line. The leftward shearing line can be
@@ -25,20 +28,39 @@ impl Default for Board {
                 let center = (-4..5)
                     .cartesian_product(-4..5)
                     .map(|(a, b)| IVec2::new(a, b));
-                let following_y = (5..9)
-                    .flat_map(|y| (-4..(5 - y)).map(move |x| IVec2::new(x, y)))
-                    .flat_map(|v| [v, -v]);
-                let following_x = (5..9)
-                    .flat_map(|x| (-4..(5 - x)).map(move |y| IVec2::new(x, y)))
-                    .flat_map(|v| [v, -v]);
 
                 center
-                    .chain(following_y)
-                    .chain(following_x)
+                    .chain(Self::region_2())
+                    .chain(Self::region_3())
+                    .chain(Self::region_5())
+                    .chain(Self::region_6())
                     .map(|v| (v, Player::None))
                     .collect()
             },
         }
+    }
+}
+
+/// Iterators for each home region of the board
+impl Board {
+    fn region_1() -> impl Iterator<Item = IVec2> {
+        (0..5).flat_map(|x| (5 - x..5).map(move |y| ivec2(x, y)))
+    }
+    fn region_2() -> impl Iterator<Item = IVec2> {
+        (5..9).flat_map(|y| (-4..(5 - y)).map(move |x| ivec2(x, y)))
+    }
+    fn region_3() -> impl Iterator<Item = IVec2> {
+        (5..9).flat_map(|x| (-4..(5 - x)).map(move |y| ivec2(x, y)))
+    }
+
+    fn region_4() -> impl Iterator<Item = IVec2> {
+        Self::region_1().map(|v| -v)
+    }
+    fn region_5() -> impl Iterator<Item = IVec2> {
+        Self::region_2().map(|v| -v)
+    }
+    fn region_6() -> impl Iterator<Item = IVec2> {
+        Self::region_3().map(|v| -v)
     }
 }
 
@@ -62,6 +84,8 @@ impl Board {
             IVec2::new(1, -1),
         ]
     }
+
+    pub fn fill(&mut self, mode: Mode) {}
 
     pub fn draw(&self, draw: &Draw) {
         let (bx, by) = Self::bases();
@@ -95,14 +119,17 @@ impl Board {
     /// "series" of jumps). Both positions given must
     /// be valid positions on the board.
     pub fn is_legal(&self, starts: IVec2, ends: IVec2) -> bool {
-        Self::cardinals().into_iter().find_map(|cardinal| {
-            if starts + cardinal == ends {
-                Some(true)
-            } else if starts + 2 * cardinal == ends {
-                Some(self.backing.get(&(starts + cardinal)).unwrap() != &Player::None)
-            } else {
-                None
-            }
-        }).unwrap_or(false)
+        Self::cardinals()
+            .into_iter()
+            .find_map(|cardinal| {
+                if starts + cardinal == ends {
+                    Some(true)
+                } else if starts + 2 * cardinal == ends {
+                    Some(self.backing.get(&(starts + cardinal)).unwrap() != &Player::None)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or(false)
     }
 }

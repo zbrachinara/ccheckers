@@ -1,6 +1,14 @@
 use nannou::prelude::*;
 
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
+pub enum Mode {
+    #[default]
+    None,
+    Two,
+    Three,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub enum Player {
     #[default]
     None,
