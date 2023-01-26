@@ -26,6 +26,7 @@ fn divide(v1: IVec2, v2: IVec2) -> Option<i32> {
 /// (-4, 0) is in the left. By this, the top left is at (-4, 4) and the bottom right is at (4, -4)
 pub struct Board {
     backing: HashMap<IVec2, Player>,
+    path: Vec<IVec2>,
 }
 
 impl Default for Board {
@@ -44,6 +45,7 @@ impl Default for Board {
                     .map(|v| (v, Player::None))
                     .collect()
             },
+            path: Default::default(),
         }
     }
 }
@@ -145,8 +147,18 @@ impl Board {
                 .radius(Self::WIDTH)
                 .finish();
         }
+        self.draw_path(draw)
     }
 
+    fn draw_path(&self, draw: &Draw) {
+        for (p1, p2) in self.path.iter().tuple_windows() {
+            draw.line()
+                .start(Board::physical_position(p1))
+                .end(Board::physical_position(p2))
+                .weight(0.01)
+                .color(RED);
+        }
+    }
     /// Converts a board position into a viewport position
     pub fn physical_position(point: &IVec2) -> Point2 {
         let (bx, by) = Self::bases();
@@ -170,21 +182,53 @@ impl Board {
 
     /// Checks if moving from the first to the second position is a legal jump, taking into account
     /// the full path. Both positions given must be valid positions on the board.
-    pub fn is_legal(&self, starts: IVec2, ends: IVec2, path: &Vec<IVec2>) -> bool {
-        match Self::cardinal_distance(starts, ends) {
-            Some((_, x)) if x == 1 => path.len() == 1,
-            Some((cardinal, x)) if x == 2 => {
-                if path.len() > 1
-                    && Self::cardinal_distance(*path.get(0).unwrap(), *path.get(1).unwrap())
+    pub fn is_legal(&self, new: IVec2, turn: Player) -> bool {
+        if let Some(&starts) = self.path.last() {
+            match Self::cardinal_distance(starts, new) {
+                Some((_, x)) if x == 1 => self.path.len() == 1,
+                Some((cardinal, x)) if x == 2 => {
+                    if self.path.len() > 1
+                        && Self::cardinal_distance(
+                            *self.path.get(0).unwrap(),
+                            *self.path.get(1).unwrap(),
+                        )
                         .unwrap()
-                        .1
-                        == 1
-                {
-                    return false;
+                        .1 == 1
+                    {
+                        return false;
+                    }
+                    self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
                 }
-                self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
+                _ => false,
             }
-            _ => false,
+        } else {
+            self.get(&new).map(|p| p == turn).unwrap_or(false)
+        }
+    }
+
+    pub fn try_push_path(&mut self, new: IVec2, turn: Player) -> bool {
+        if self.is_legal(new, turn) {
+            self.path.push(new);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn pop_path(&mut self) {
+        self.path.pop();
+    }
+
+    /// If the path is long enough to move, does the move and returns true. Otherwise does nothing
+    /// and returns false.
+    pub fn commit_path(&mut self) -> bool {
+        if self.path.len() > 1 {
+            let (first, last) = (*self.path.first().unwrap(), *self.path.last().unwrap());
+            self.move_piece(&first, &last);
+            self.path.clear();
+            true
+        } else {
+            false
         }
     }
 }
