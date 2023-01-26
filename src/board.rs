@@ -5,7 +5,6 @@ use nannou::{prelude::*, state::Mouse};
 
 use crate::{player::Player, HEX_SIZE};
 
-
 /// Board is a 2d representation of the hexagonal grid, where the horizontal component remains as is
 /// and the "vertical" component is the rightward shearing line. The leftward shearing line can be
 /// represented using left diagonal lines drawn through the "gridlines". Right diagnonal lines
@@ -48,9 +47,21 @@ impl Board {
     const WIDTH: f32 = (HEX_SIZE - Self::BASE_SPACING * 4.5) / 9.0;
     const SPACING: f32 = Self::BASE_SPACING + Self::WIDTH * 2.0;
 
-    pub fn bases() -> (Vec2, Vec2) {
+    fn bases() -> (Vec2, Vec2) {
         let unit = Vec2::new(Self::SPACING, 0.0);
         (unit, unit.rotate(f32::FRAC_PI_3()))
+    }
+
+    /// Returns all cardinals in
+    fn cardinals() -> [IVec2; 6] {
+        [
+            IVec2::X,
+            IVec2::Y,
+            IVec2::new(-1, 1),
+            -IVec2::X,
+            -IVec2::Y,
+            IVec2::new(1, -1),
+        ]
     }
 
     pub fn draw(&self, draw: &Draw) {
@@ -77,11 +88,22 @@ impl Board {
         self.backing.contains_key(&predicted).then_some(predicted)
     }
 
-    pub fn contains(&self, position: &IVec2) -> bool {
-        self.backing.contains_key(position)
-    }
-
     pub fn get(&self, position: &IVec2) -> Option<Player> {
         self.backing.get(position).copied()
+    }
+
+    /// Checks if moving from the first to the second position is a legal jump (does not calculate a
+    /// "series" of jumps). Both positions given must
+    /// be valid positions on the board.
+    pub fn is_legal(&self, starts: IVec2, ends: IVec2) -> bool {
+        Self::cardinals().into_iter().find_map(|cardinal| {
+            if starts + cardinal == ends {
+                Some(true)
+            } else if starts + 2 * cardinal == ends {
+                Some(self.backing.get(&(starts + cardinal)).unwrap() != &Player::None)
+            } else {
+                None
+            }
+        }).unwrap_or(false)
     }
 }

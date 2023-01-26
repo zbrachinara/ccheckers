@@ -1,6 +1,6 @@
 use board::Board;
 use itertools::Itertools;
-use nannou::prelude::*;
+use nannou::{prelude::*, state::Mouse};
 use player::Player;
 
 mod board;
@@ -77,15 +77,19 @@ fn update(app: &App, m: &mut Model, e: Event) {
     #[allow(clippy::single_match)]
     match e {
         Event::WindowEvent {
-            simple: Some(WindowEvent::MousePressed(btn)),
+            simple: Some(WindowEvent::MousePressed(MouseButton::Left)),
             ..
         } => {
             if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
-                let legal = if m.path.is_empty() {
-                    m.board.get(&position).map(|p| p == m.turn).unwrap_or(false)
+                let legal = if let Some(&recent) = m.path.last() {
+                    m.board.is_legal(recent, position)
                 } else {
-                    todo!("Check if this position is a neighbor or a neighbor of an occupied neighbor")
+                    m.board.get(&position).map(|p| p == m.turn).unwrap_or(false)
                 };
+
+                if legal {
+                    m.path.push(position);
+                }
             }
         }
         _ => (),
