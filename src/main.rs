@@ -10,38 +10,6 @@ mod player;
 
 const HEX_SIZE: f32 = 0.57;
 
-/// Finds out if the given position is in an "outer region" of the playing board, and if so, which
-/// one it is in. An outer region is a region which contains positions that don't fall on the
-/// central hexagon. These outer regions are indexed roughly corresponding to which edge of the
-/// hexagon the region is adjacent to, counting counterclockwise in the usual way. For example, if a
-/// point lies directly above the top edge of the hexagon, its region is given the index `1`, since
-/// the previous edge, the first one starting from the x axis, was given the index `0`.
-///
-/// The outer regions do not contain every point outside of the hexagon. Instead, they are defined
-/// so that every point that is within a player's home is part of an outer region. This means that
-/// if the position that you pass in is not a valid playing position, you may get a nonsensical
-/// answer.
-fn outer_region_of(position: IVec2) -> Option<u8> {
-    let (x, y) = (position.x, position.y);
-
-    const BOARD_SIZE: i32 = 4; // the minimum amount of positions to walk until you reach the edge of the board
-    if x > 0 && y > 0 && x + y > BOARD_SIZE {
-        Some(0)
-    } else if -BOARD_SIZE < x && x < 0 && y > BOARD_SIZE {
-        Some(1)
-    } else if todo!() {
-        Some(2)
-    } else if todo!() {
-        Some(3)
-    } else if todo!() {
-        Some(4)
-    } else if todo!() {
-        Some(5)
-    } else {
-        None
-    }
-}
-
 fn viewport_size(app: &App) -> f32 {
     let window_bounds = app.main_window().rect();
     f32::min(window_bounds.w(), window_bounds.h()) / 2.
