@@ -1,7 +1,7 @@
 use board::Board;
 use itertools::Itertools;
-use nannou::{prelude::*, state::Mouse};
-use nannou_egui::Egui;
+use nannou::prelude::*;
+use nannou_egui::{egui, Egui};
 use player::Player;
 
 mod board;
@@ -55,17 +55,25 @@ struct Model {
 
 fn main() {
     nannou::app(model)
-        .simple_window(window_handler)
         .event(events)
+        .update(update)
         .run()
 }
 
 fn model(app: &App) -> Model {
+    let window_id = app
+        .new_window()
+        .view(window_handler)
+        .raw_event(raw_window_event)
+        .build()
+        .unwrap();
+    let window = app.window(window_id).unwrap();
+    
     Model {
         board: Default::default(),
         path: Default::default(),
         turn: Default::default(),
-        egui: Egui::from_window(&app.main_window()),
+        egui: Egui::from_window(&window),
     }
 }
 
@@ -77,6 +85,19 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     draw_board(&draw);
     m.board.draw(&draw);
     draw.to_frame(app, &f).unwrap();
+    m.egui.draw_to_frame(&f).unwrap();
+}
+
+fn update(_app: &App, model: &mut Model, update: Update) {
+    let Model { ref mut egui, .. } = *model;
+
+    egui.set_elapsed_time(update.since_start);
+    let ctx = egui.begin_frame();
+    egui::Window::new("Workshop window").show(&ctx, |ui| {});
+}
+
+fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {
+    model.egui.handle_raw_event(event);
 }
 
 fn events(app: &App, m: &mut Model, e: Event) {
