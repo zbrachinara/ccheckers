@@ -142,7 +142,7 @@ struct Model {
 fn main() {
     nannou::app(model)
         .simple_window(window_handler)
-        .update(update)
+        .event(update)
         .run()
 }
 
@@ -160,9 +160,17 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     draw.to_frame(app, &f).unwrap();
 }
 
-fn update(app: &App, m: &mut Model, _: Update) {
-    let viewport_size = viewport_size(app);
-    let position = m.board.position_of(&app.mouse, viewport_size);
+fn update(app: &App, m: &mut Model, e: Event) {
+    #[allow(clippy::single_match)]
+    match e {
+        Event::WindowEvent {
+            simple: Some(WindowEvent::MousePressed(btn)),
+            ..
+        } => if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
+            // TODO check valid move and then use position 
+        },
+        _ => (),
+    }
 }
 
 fn draw_board(draw: &Draw) {
