@@ -1,6 +1,7 @@
 use board::Board;
 use itertools::Itertools;
 use nannou::{prelude::*, state::Mouse};
+use nannou_egui::Egui;
 use player::Player;
 
 mod board;
@@ -45,22 +46,27 @@ fn viewport_size(app: &App) -> f32 {
     f32::min(window_bounds.w(), window_bounds.h()) / 2.
 }
 
-#[derive(Default)]
 struct Model {
     board: Board,
     path: Vec<IVec2>,
     turn: Player,
+    egui: Egui,
 }
 
 fn main() {
     nannou::app(model)
         .simple_window(window_handler)
-        .event(update)
+        .event(events)
         .run()
 }
 
-fn model(_: &App) -> Model {
-    Model::default()
+fn model(app: &App) -> Model {
+    Model {
+        board: Default::default(),
+        path: Default::default(),
+        turn: Default::default(),
+        egui: Egui::from_window(&app.main_window()),
+    }
 }
 
 fn window_handler(app: &App, m: &Model, f: Frame) {
@@ -73,7 +79,7 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     draw.to_frame(app, &f).unwrap();
 }
 
-fn update(app: &App, m: &mut Model, e: Event) {
+fn events(app: &App, m: &mut Model, e: Event) {
     #[allow(clippy::single_match)]
     match e {
         Event::WindowEvent {
