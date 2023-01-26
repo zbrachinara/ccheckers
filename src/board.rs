@@ -8,6 +8,13 @@ use crate::{
     HEX_SIZE,
 };
 
+/// "Divides" v1 by v2
+fn divide(v1: IVec2, v2: IVec2) -> Option<i32> {
+    v1.x.checked_div(v2.x)
+        .or_else(|| v1.y.checked_div(v2.y))
+        .and_then(|r| (r > 0 && v2.x * r == v1.x && v2.y * r == v1.y).then_some(r))
+}
+
 /// Board is a 2d representation of the hexagonal grid, where the horizontal component remains as is
 /// and the "vertical" component is the rightward shearing line. The leftward shearing line can be
 /// represented using left diagonal lines drawn through the "gridlines". Right diagnonal lines
@@ -85,6 +92,13 @@ impl Board {
         ]
     }
 
+    pub fn cardinal_distance(v1: IVec2, v2: IVec2) -> Option<(IVec2, i32)> {
+        let dv = v2 - v1;
+        Self::cardinals()
+            .into_iter()
+            .find_map(|cardinal| divide(dv, cardinal).map(|div| (cardinal, div)))
+    }
+
     fn fill_area(&mut self, positions: impl Iterator<Item = IVec2>, piece: Player) {
         for p in positions {
             *self.backing.get_mut(&p).unwrap() = piece;
@@ -154,21 +168,23 @@ impl Board {
         self.backing.get(position).copied()
     }
 
-    /// Checks if moving from the first to the second position is a legal jump (does not calculate a
-    /// "series" of jumps). Both positions given must
-    /// be valid positions on the board.
-    pub fn is_legal(&self, starts: IVec2, ends: IVec2) -> bool {
-        Self::cardinals()
-            .into_iter()
-            .find_map(|cardinal| {
-                if starts + cardinal == ends {
-                    Some(true)
-                } else if starts + 2 * cardinal == ends {
-                    Some(self.backing.get(&(starts + cardinal)).unwrap() != &Player::None)
-                } else {
-                    None
+    /// Checks if moving from the first to the second position is a legal jump, taking into account
+    /// the full path. Both positions given must be valid positions on the board.
+    pub fn is_legal(&self, starts: IVec2, ends: IVec2, path: &Vec<IVec2>) -> bool {
+        match Self::cardinal_distance(starts, ends) {
+            Some((_, x)) if x == 1 => path.len() == 1,
+            Some((cardinal, x)) if x == 2 => {
+                if path.len() > 1
+                    && Self::cardinal_distance(*path.get(0).unwrap(), *path.get(1).unwrap())
+                        .unwrap()
+                        .1
+                        == 1
+                {
+                    return false;
                 }
-            })
-            .unwrap_or(false)
+                self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
+            }
+            _ => false,
+        }
     }
 }

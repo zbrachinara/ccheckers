@@ -135,7 +135,7 @@ fn events(app: &App, m: &mut Model, e: Event) {
         } => {
             if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
                 let legal = if let Some(&recent) = m.path.last() {
-                    m.board.is_legal(recent, position)
+                    m.board.is_legal(recent, position, &m.path)
                 } else {
                     m.board.get(&position).map(|p| p == m.turn).unwrap_or(false)
                 };
