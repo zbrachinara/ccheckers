@@ -1,7 +1,9 @@
 use nannou::prelude::*;
+use strum_macros::{EnumIter, Display};
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug, EnumIter, Display)]
 pub enum Mode {
+    #[default]
     Two,
     Three,
 }

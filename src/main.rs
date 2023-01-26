@@ -2,7 +2,8 @@ use board::Board;
 use itertools::Itertools;
 use nannou::prelude::*;
 use nannou_egui::{egui, Egui};
-use player::Player;
+use player::{Mode, Player};
+use strum::IntoEnumIterator;
 
 mod board;
 mod player;
@@ -46,18 +47,21 @@ fn viewport_size(app: &App) -> f32 {
     f32::min(window_bounds.w(), window_bounds.h()) / 2.
 }
 
+#[derive(Default)]
+struct EguiData {
+    mode: Mode,
+}
+
 struct Model {
     board: Board,
     path: Vec<IVec2>,
     turn: Player,
     egui: Egui,
+    egui_data: EguiData,
 }
 
 fn main() {
-    nannou::app(model)
-        .event(events)
-        .update(update)
-        .run()
+    nannou::app(model).event(events).update(update).run()
 }
 
 fn model(app: &App) -> Model {
@@ -68,12 +72,13 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
     let window = app.window(window_id).unwrap();
-    
+
     Model {
         board: Default::default(),
         path: Default::default(),
         turn: Default::default(),
         egui: Egui::from_window(&window),
+        egui_data: Default::default(),
     }
 }
 
@@ -93,7 +98,16 @@ fn update(_app: &App, model: &mut Model, update: Update) {
 
     egui.set_elapsed_time(update.since_start);
     let ctx = egui.begin_frame();
-    egui::Window::new("Workshop window").show(&ctx, |ui| {});
+    // define ui
+    egui::Window::new("ChuFEUNieSE CHEikcERsS????").show(&ctx, |ui| {
+        egui::ComboBox::from_label("#Players")
+            .selected_text(format!("{}", model.egui_data.mode))
+            .show_ui(ui, |ui| {
+                for mode in Mode::iter() {
+                    ui.selectable_value(&mut model.egui_data.mode, mode, format!("{mode}"));
+                }
+            })
+    });
 }
 
 fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {
