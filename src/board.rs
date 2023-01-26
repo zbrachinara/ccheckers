@@ -92,6 +92,9 @@ impl Board {
     }
 
     pub fn fill(&mut self, mode: Mode) {
+        for v in self.backing.values_mut() {
+            *v = Player::None;
+        }
         match mode {
             Mode::Two => {
                 self.fill_area(
@@ -113,6 +116,10 @@ impl Board {
                 self.fill_area(Self::region_5().chain(Self::region_6()), Player::Player3);
             },
         }
+    }
+
+    pub fn move_piece(&mut self, from: &IVec2, to: &IVec2) {
+        *self.backing.get_mut(to).unwrap() = std::mem::take(self.backing.get_mut(from).unwrap())
     }
 
     pub fn draw(&self, draw: &Draw) {
