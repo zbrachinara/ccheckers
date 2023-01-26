@@ -55,7 +55,6 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
 
     f.clear(ANTIQUEWHITE);
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
-    draw_board_back(&draw);
     m.board.draw(&draw);
     draw.to_frame(app, &f).unwrap();
     m.egui.draw_to_frame(&f).unwrap();
@@ -118,18 +117,4 @@ fn events(app: &App, m: &mut Model, e: Event) {
         }
         _ => (),
     }
-}
-
-
-fn draw_board_back(draw: &Draw) {
-    let hex_coords = (0..)
-        .map(|i| f32::PI() * i as f32 / 3.0)
-        .map(|rad| pt2(rad.cos(), rad.sin()) * HEX_SIZE);
-
-    let hex = hex_coords.clone().take(6);
-    draw.polygon().points(hex);
-
-    hex_coords.tuple_windows().take(6).for_each(|(a, b)| {
-        draw.polygon().color(STEELBLUE).points([a, b, a + b]);
-    });
 }

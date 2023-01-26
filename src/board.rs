@@ -138,27 +138,6 @@ impl Board {
         *self.backing.get_mut(to).unwrap() = std::mem::take(self.backing.get_mut(from).unwrap())
     }
 
-    pub fn draw(&self, draw: &Draw) {
-        for (pos, state) in &self.backing {
-            let physical_position = Self::physical_position(pos);
-            draw.ellipse()
-                .color(Rgb::<u8>::from(*state))
-                .x_y(physical_position.x, physical_position.y)
-                .radius(Self::WIDTH)
-                .finish();
-        }
-        self.draw_path(draw)
-    }
-
-    fn draw_path(&self, draw: &Draw) {
-        for (p1, p2) in self.path.iter().tuple_windows() {
-            draw.line()
-                .start(Board::physical_position(p1))
-                .end(Board::physical_position(p2))
-                .weight(0.01)
-                .color(RED);
-        }
-    }
     /// Converts a board position into a viewport position
     pub fn physical_position(point: &IVec2) -> Point2 {
         let (bx, by) = Self::bases();
@@ -229,6 +208,48 @@ impl Board {
             true
         } else {
             false
+        }
+    }
+}
+
+impl Board {
+    pub fn draw(&self, draw: &Draw) {
+        Self::draw_board_background(draw);
+        self.draw_pieces(draw);
+        self.draw_path(draw);
+    }
+
+    fn draw_board_background(draw: &Draw) {
+        let hex_coords = (0..)
+            .map(|i| f32::PI() * i as f32 / 3.0)
+            .map(|rad| pt2(rad.cos(), rad.sin()) * HEX_SIZE);
+
+        let hex = hex_coords.clone().take(6);
+        draw.polygon().points(hex);
+
+        hex_coords.tuple_windows().take(6).for_each(|(a, b)| {
+            draw.polygon().color(STEELBLUE).points([a, b, a + b]);
+        });
+    }
+
+    fn draw_pieces(&self, draw: &Draw) {
+        for (pos, state) in &self.backing {
+            let physical_position = Self::physical_position(pos);
+            draw.ellipse()
+                .color(Rgb::<u8>::from(*state))
+                .x_y(physical_position.x, physical_position.y)
+                .radius(Self::WIDTH)
+                .finish();
+        }
+    }
+    
+    fn draw_path(&self, draw: &Draw) {
+        for (p1, p2) in self.path.iter().tuple_windows() {
+            draw.line()
+                .start(Board::physical_position(p1))
+                .end(Board::physical_position(p2))
+                .weight(0.01)
+                .color(RED);
         }
     }
 }
