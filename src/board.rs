@@ -52,7 +52,6 @@ impl Board {
         (unit, unit.rotate(f32::FRAC_PI_3()))
     }
 
-    /// Returns all cardinals in
     fn cardinals() -> [IVec2; 6] {
         [
             IVec2::X,
