@@ -115,6 +115,10 @@ fn update(_app: &App, model: &mut Model, update: Update) {
             model.board.fill(model.mode);
             model.turn = Player::Player1;
         }
+
+        if model.turn != Player::None {
+            ui.label(format!("Currently {}'s turn", model.turn));
+        }
     });
 }
 

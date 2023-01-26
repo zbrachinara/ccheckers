@@ -8,7 +8,7 @@ pub enum Mode {
     Three,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Display)]
 pub enum Player {
     #[default]
     None,
