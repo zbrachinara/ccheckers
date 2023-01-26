@@ -91,6 +91,7 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
     draw_board_back(&draw);
     m.board.draw(&draw);
+    draw_path(m, &draw);
     draw.to_frame(app, &f).unwrap();
     m.egui.draw_to_frame(&f).unwrap();
 }
@@ -140,14 +141,28 @@ fn events(app: &App, m: &mut Model, e: Event) {
                 }
             }
         }
-        Event::WindowEvent { simple: Some(WindowEvent::KeyPressed(Key::Return)), .. } => {
+        Event::WindowEvent {
+            simple: Some(WindowEvent::KeyPressed(Key::Return)),
+            ..
+        } => {
             if m.path.len() > 1 {
-                m.board.move_piece(m.path.first().unwrap(), m.path.last().unwrap());
+                m.board
+                    .move_piece(m.path.first().unwrap(), m.path.last().unwrap());
                 m.path.clear();
                 m.turn = m.mode.next_turn(m.turn)
             }
         }
         _ => (),
+    }
+}
+
+fn draw_path(model: &Model, draw: &Draw) {
+    for (p1, p2) in model.path.iter().tuple_windows() {
+        draw.line()
+            .start(Board::physical_position(p1))
+            .end(Board::physical_position(p2))
+            .weight(0.01)
+            .color(RED);
     }
 }
 

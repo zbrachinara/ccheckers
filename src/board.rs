@@ -69,7 +69,7 @@ impl Board {
     const WIDTH: f32 = (HEX_SIZE - Self::BASE_SPACING * 4.5) / 9.0;
     const SPACING: f32 = Self::BASE_SPACING + Self::WIDTH * 2.0;
 
-    fn bases() -> (Vec2, Vec2) {
+    pub fn bases() -> (Vec2, Vec2) {
         let unit = Vec2::new(Self::SPACING, 0.0);
         (unit, unit.rotate(f32::FRAC_PI_3()))
     }
@@ -114,7 +114,7 @@ impl Board {
                 self.fill_area(Self::region_1().chain(Self::region_2()), Player::Player1);
                 self.fill_area(Self::region_3().chain(Self::region_4()), Player::Player2);
                 self.fill_area(Self::region_5().chain(Self::region_6()), Player::Player3);
-            },
+            }
         }
     }
 
@@ -123,16 +123,20 @@ impl Board {
     }
 
     pub fn draw(&self, draw: &Draw) {
-        let (bx, by) = Self::bases();
-
         for (pos, state) in &self.backing {
-            let physical_position = bx * pos.x as f32 + by * pos.y as f32;
+            let physical_position = Self::physical_position(pos);
             draw.ellipse()
                 .color(Rgb::<u8>::from(*state))
                 .x_y(physical_position.x, physical_position.y)
                 .radius(Self::WIDTH)
                 .finish();
         }
+    }
+
+    /// Converts a board position into a viewport position
+    pub fn physical_position(point: &IVec2) -> Point2 {
+        let (bx, by) = Self::bases();
+        bx * point.x as f32 + by * point.y as f32
     }
 
     /// Converts the screen position (say, of the cursor) into a position on the board, if the
