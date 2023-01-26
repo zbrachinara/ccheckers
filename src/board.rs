@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use nannou::{prelude::*, state::Mouse};
+use nannou::{prelude::*, state::Mouse, color::Alpha};
 
 use crate::{
     player::{Mode, Player},
@@ -234,16 +234,21 @@ impl Board {
 
     fn draw_pieces(&self, draw: &Draw) {
         for (pos, state) in &self.backing {
-            let physical_position = Self::physical_position(pos);
             draw.ellipse()
                 .color(Rgb::<u8>::from(*state))
-                .x_y(physical_position.x, physical_position.y)
+                .xy(Self::physical_position(pos))
                 .radius(Self::WIDTH)
                 .finish();
         }
     }
-    
+
     fn draw_path(&self, draw: &Draw) {
+        for point in &self.path {
+            draw.ellipse()
+                .color(Alpha::<Rgb<_>, _>::new(0.0, 0.0, 0.0, 0.5))
+                .radius(Self::WIDTH + Self::BASE_SPACING / 5.0)
+                .xy(Self::physical_position(point));
+        }
         for (p1, p2) in self.path.iter().tuple_windows() {
             draw.line()
                 .start(Board::physical_position(p1))

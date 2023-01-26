@@ -1,5 +1,4 @@
 use board::Board;
-use itertools::Itertools;
 use nannou::prelude::*;
 use nannou_egui::{egui, Egui};
 use player::{Mode, Player};
