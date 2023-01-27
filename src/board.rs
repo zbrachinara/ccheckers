@@ -159,8 +159,8 @@ impl Board {
         self.backing.get(position).copied()
     }
 
-    /// Checks if moving from the first to the second position is a legal jump, taking into account
-    /// the full path. Both positions given must be valid positions on the board.
+    /// Checks if jumping from the first to the second position is legal, taking into account the
+    /// rest of the path. Both positions given must be valid positions on the board.
     pub fn is_legal(&self, new: IVec2, turn: Player) -> bool {
         if let Some(&starts) = self.path.last() {
             self.backing.get(&new).unwrap() == &Player::None
@@ -214,6 +214,8 @@ impl Board {
 }
 
 impl Board {
+    const HIGHLIGHT_WIDTH: f32 = Self::WIDTH + Self::BASE_SPACING / 5.0;
+
     pub fn draw(&self, draw: &Draw) {
         Self::draw_board_background(draw);
         self.draw_pieces(draw);
@@ -247,7 +249,7 @@ impl Board {
         for point in &self.path {
             draw.ellipse()
                 .color(Alpha::<Rgb<_>, _>::new(0.0, 0.0, 0.0, 0.5))
-                .radius(Self::WIDTH + Self::BASE_SPACING / 5.0)
+                .radius(Self::HIGHLIGHT_WIDTH)
                 .xy(Self::physical_position(point));
         }
         for (p1, p2) in self.path.iter().tuple_windows() {
