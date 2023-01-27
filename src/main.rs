@@ -1,7 +1,7 @@
 use board::Board;
 use nannou::prelude::*;
 use nannou_egui::{egui, Egui};
-use player::{Mode, Player};
+use player::{Mode, Piece, Turn};
 use strum::IntoEnumIterator;
 
 mod board;
@@ -21,7 +21,7 @@ struct EguiData {
 
 struct Model {
     board: Board,
-    turn: Player,
+    turn: Turn,
     egui: Egui,
     egui_data: EguiData,
     mode: Mode,
@@ -76,10 +76,10 @@ fn update(_app: &App, model: &mut Model, update: Update) {
         if ui.button("Reset field").clicked() {
             model.mode = model.egui_data.mode;
             model.board.reset();
-            model.turn = Player::Player1;
+            model.turn = Turn::Player1;
         }
 
-        if model.turn != Player::None {
+        if model.turn != Turn::None {
             ui.label(format!("Currently {}'s turn", model.turn));
         }
     });
@@ -97,7 +97,7 @@ fn events(app: &App, m: &mut Model, e: Event) {
             ..
         } => {
             if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
-                m.board.try_push_path(position, m.turn);
+                m.board.try_push_path(position, m.turn, m.mode);
             }
         }
         Event::WindowEvent {

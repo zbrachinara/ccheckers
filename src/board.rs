@@ -9,7 +9,7 @@ use nannou::{
 use strum::IntoEnumIterator;
 
 use crate::{
-    player::{Mode, Player},
+    player::{Mode, Piece, Turn},
     HEX_SIZE,
 };
 
@@ -30,7 +30,7 @@ fn divide(v1: IVec2, v2: IVec2) -> Option<i32> {
 /// in the bottom left corner of the hexagon. Similarly, the point at (4, 0) is at the right, while
 /// (-4, 0) is in the left. By this, the top left is at (-4, 4) and the bottom right is at (4, -4)
 pub struct Board {
-    backing: HashMap<IVec2, Player>,
+    backing: HashMap<IVec2, Piece>,
     path: Vec<IVec2>,
 }
 
@@ -47,7 +47,7 @@ impl Default for Board {
                     .chain(Self::region_3())
                     .chain(Self::region_5())
                     .chain(Self::region_6())
-                    .map(|v| (v, Player::None))
+                    .map(|v| (v, Piece::None))
                     .collect()
             },
             path: Default::default(),
@@ -106,7 +106,7 @@ impl Board {
             .find_map(|cardinal| divide(dv, cardinal).map(|div| (cardinal, div)))
     }
 
-    fn fill_area(&mut self, positions: impl Iterator<Item = IVec2>, piece: Player) {
+    fn fill_area(&mut self, positions: impl Iterator<Item = IVec2>, piece: Piece) {
         for p in positions {
             *self.backing.get_mut(&p).unwrap() = piece;
         }
@@ -114,12 +114,12 @@ impl Board {
 
     pub fn reset(&mut self) {
         self.path.clear();
-        self.fill_area(Self::region_1(), Player::Player1);
-        self.fill_area(Self::region_2(), Player::Player2);
-        self.fill_area(Self::region_3(), Player::Player3);
-        self.fill_area(Self::region_4(), Player::Player4);
-        self.fill_area(Self::region_5(), Player::Player5);
-        self.fill_area(Self::region_6(), Player::Player6);
+        self.fill_area(Self::region_1(), Piece::Player1);
+        self.fill_area(Self::region_2(), Piece::Player2);
+        self.fill_area(Self::region_3(), Piece::Player3);
+        self.fill_area(Self::region_4(), Piece::Player4);
+        self.fill_area(Self::region_5(), Piece::Player5);
+        self.fill_area(Self::region_6(), Piece::Player6);
     }
 
     pub fn move_piece(&mut self, from: &IVec2, to: &IVec2) {
@@ -143,13 +143,13 @@ impl Board {
         self.backing.contains_key(&predicted).then_some(predicted)
     }
 
-    pub fn get(&self, position: &IVec2) -> Option<Player> {
+    pub fn get(&self, position: &IVec2) -> Option<Piece> {
         self.backing.get(position).copied()
     }
 
     /// Checks if jumping from the first to the second position is legal, taking into account the
     /// rest of the path. Both positions given must be valid positions on the board.
-    pub fn is_legal(&self, new: IVec2, turn: Player) -> bool {
+    pub fn is_legal(&self, new: IVec2, turn: Turn, mode: Mode) -> bool {
         if let Some(&starts) = self.path.last() {
             self.backing.get(&new).unwrap().is_none()
                 && match Self::cardinal_distance(starts, new) {
@@ -170,12 +170,12 @@ impl Board {
                     _ => false,
                 }
         } else {
-            self.get(&new).map(|p| p == turn).unwrap_or(false)
+            self.get(&new).map(|p| turn.owns(p, mode)).unwrap_or(false)
         }
     }
 
-    pub fn try_push_path(&mut self, new: IVec2, turn: Player) -> bool {
-        if self.is_legal(new, turn) {
+    pub fn try_push_path(&mut self, new: IVec2, turn: Turn, mode: Mode) -> bool {
+        if self.is_legal(new, turn, mode) {
             self.path.push(new);
             true
         } else {
@@ -221,7 +221,7 @@ impl Board {
         hex_coords
             .tuple_windows()
             .take(6)
-            .zip(Player::iter().skip(1).map(rgb::Rgb::from))
+            .zip(Piece::iter().skip(1).map(rgb::Rgb::from))
             .for_each(|((a, b), piece_kind)| {
                 draw.polygon()
                     .color(piece_kind.lighten(0.1))
