@@ -9,6 +9,7 @@ pub enum Mode {
     #[default]
     Two,
     Three,
+    Six,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Default, Display)]
@@ -41,6 +42,18 @@ impl Turn {
                         Piece::Player1 | Piece::Player2 => Turn::Player1,
                         Piece::Player3 | Piece::Player4 => Turn::Player2,
                         Piece::Player5 | Piece::Player6 => Turn::Player3,
+                    }
+            }
+            Mode::Six => {
+                *self
+                    == match piece {
+                        Piece::None => return false,
+                        Piece::Player1 => Turn::Player1,
+                        Piece::Player2 => Turn::Player2,
+                        Piece::Player3 => Turn::Player3,
+                        Piece::Player4 => Turn::Player4,
+                        Piece::Player5 => Turn::Player5,
+                        Piece::Player6 => Turn::Player6,
                     }
             }
         }
@@ -96,6 +109,15 @@ impl Mode {
                 Turn::Player2 => Turn::Player3,
                 Turn::Player3 => Turn::Player1,
                 _ => Turn::Player1,
+            },
+            Mode::Six => match turn {
+                Turn::None => panic!("Wrong turn: Should not be possible to reach ingame"),
+                Turn::Player1 => Turn::Player2,
+                Turn::Player2 => Turn::Player3,
+                Turn::Player3 => Turn::Player4,
+                Turn::Player4 => Turn::Player5,
+                Turn::Player5 => Turn::Player6,
+                Turn::Player6 => Turn::Player1,
             },
         }
     }

@@ -166,7 +166,7 @@ impl Board {
                         {
                             return false;
                         }
-                        self.backing.get(&(starts + cardinal)).unwrap().is_none()
+                        !self.backing.get(&(starts + cardinal)).unwrap().is_none()
                     }
                     _ => false,
                 }
