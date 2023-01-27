@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use nannou::{prelude::*, state::Mouse, color::Alpha};
+use nannou::{color::Alpha, prelude::*, state::Mouse};
 
 use crate::{
     player::{Mode, Player},
@@ -163,23 +163,24 @@ impl Board {
     /// the full path. Both positions given must be valid positions on the board.
     pub fn is_legal(&self, new: IVec2, turn: Player) -> bool {
         if let Some(&starts) = self.path.last() {
-            match Self::cardinal_distance(starts, new) {
-                Some((_, x)) if x == 1 => self.path.len() == 1,
-                Some((cardinal, x)) if x == 2 => {
-                    if self.path.len() > 1
-                        && Self::cardinal_distance(
-                            *self.path.get(0).unwrap(),
-                            *self.path.get(1).unwrap(),
-                        )
-                        .unwrap()
-                        .1 == 1
-                    {
-                        return false;
+            self.backing.get(&new).unwrap() == &Player::None
+                && match Self::cardinal_distance(starts, new) {
+                    Some((_, x)) if x == 1 => self.path.len() == 1,
+                    Some((cardinal, x)) if x == 2 => {
+                        if self.path.len() > 1
+                            && Self::cardinal_distance(
+                                *self.path.get(0).unwrap(),
+                                *self.path.get(1).unwrap(),
+                            )
+                            .unwrap()
+                            .1 == 1
+                        {
+                            return false;
+                        }
+                        self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
                     }
-                    self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
+                    _ => false,
                 }
-                _ => false,
-            }
         } else {
             self.get(&new).map(|p| p == turn).unwrap_or(false)
         }
