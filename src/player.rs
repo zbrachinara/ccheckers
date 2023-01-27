@@ -28,6 +28,12 @@ impl From<Player> for Rgb<u8> {
     }
 }
 
+impl Player {
+    pub fn is_none(&self) -> bool {
+        matches!(self, Player::None)
+    }
+}
+
 impl Mode {
     pub fn next_turn(&self, turn: Player) -> Player {
         match self {

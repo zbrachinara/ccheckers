@@ -163,7 +163,7 @@ impl Board {
     /// rest of the path. Both positions given must be valid positions on the board.
     pub fn is_legal(&self, new: IVec2, turn: Player) -> bool {
         if let Some(&starts) = self.path.last() {
-            self.backing.get(&new).unwrap() == &Player::None
+            self.backing.get(&new).unwrap().is_none()
                 && match Self::cardinal_distance(starts, new) {
                     Some((_, x)) if x == 1 => self.path.len() == 1,
                     Some((cardinal, x)) if x == 2 => {
@@ -177,7 +177,7 @@ impl Board {
                         {
                             return false;
                         }
-                        self.backing.get(&(starts + cardinal)).unwrap() != &Player::None
+                        self.backing.get(&(starts + cardinal)).unwrap().is_none()
                     }
                     _ => false,
                 }
