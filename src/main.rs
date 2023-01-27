@@ -54,7 +54,7 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
 
     f.clear(ANTIQUEWHITE);
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
-    m.board.draw(&draw);
+    m.board.draw(app, &draw);
     draw.to_frame(app, &f).unwrap();
     m.egui.draw_to_frame(&f).unwrap();
 }

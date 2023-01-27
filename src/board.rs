@@ -216,7 +216,7 @@ impl Board {
 impl Board {
     const HIGHLIGHT_WIDTH: f32 = Self::WIDTH + Self::BASE_SPACING / 5.0;
 
-    pub fn draw(&self, draw: &Draw) {
+    pub fn draw(&self, app: &App, draw: &Draw) {
         Self::draw_board_background(draw);
         self.draw_pieces(draw);
         self.draw_path(draw);
@@ -239,6 +239,7 @@ impl Board {
         for (pos, state) in &self.backing {
             draw.ellipse()
                 .color(Rgb::<u8>::from(*state))
+                .resolution(20.0)
                 .xy(Self::physical_position(pos))
                 .radius(Self::WIDTH)
                 .finish();
@@ -246,9 +247,12 @@ impl Board {
     }
 
     fn draw_path(&self, draw: &Draw) {
+        let highlight_color = Alpha::<Rgb<_>, _>::new(0.0, 0.0, 0.0, 0.5);
+
         for point in &self.path {
             draw.ellipse()
-                .color(Alpha::<Rgb<_>, _>::new(0.0, 0.0, 0.0, 0.5))
+                .color(highlight_color)
+                .resolution(20.0)
                 .radius(Self::HIGHLIGHT_WIDTH)
                 .xy(Self::physical_position(point));
         }
@@ -256,8 +260,8 @@ impl Board {
             draw.line()
                 .start(Board::physical_position(p1))
                 .end(Board::physical_position(p2))
-                .weight(0.01)
-                .color(RED);
+                .weight(2.0 * Self::HIGHLIGHT_WIDTH)
+                .color(highlight_color);
         }
     }
 }
