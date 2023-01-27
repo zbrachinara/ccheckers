@@ -1,7 +1,7 @@
 use board::Board;
 use nannou::prelude::*;
 use nannou_egui::{egui, Egui};
-use player::{Mode, Piece, Turn};
+use player::{Mode, Turn};
 use strum::IntoEnumIterator;
 
 mod board;
@@ -66,6 +66,10 @@ fn update(_app: &App, model: &mut Model, update: Update) {
     let ctx = egui.begin_frame();
     // define ui
     egui::Window::new("ChuFEUNieSE CHEikcERsS????").show(&ctx, |ui| {
+        ui.label("Controls:");
+        ui.label("Click positions to begin a move");
+        ui.label("Left arrow to undo part of a move");
+        ui.label("Press enter to finish a move");
         egui::ComboBox::from_label("#Players")
             .selected_text(format!("{}", model.egui_data.mode))
             .show_ui(ui, |ui| {
