@@ -64,7 +64,7 @@ impl Board {
         (5..9).flat_map(|y| (-4..(5 - y)).map(move |x| ivec2(x, y)))
     }
     fn region_3() -> impl Iterator<Item = IVec2> {
-        (5..9).flat_map(|x| (-4..(5 - x)).map(move |y| ivec2(x, y)))
+        Self::region_6().map(|v| -v)
     }
 
     fn region_4() -> impl Iterator<Item = IVec2> {
@@ -74,7 +74,7 @@ impl Board {
         Self::region_2().map(|v| -v)
     }
     fn region_6() -> impl Iterator<Item = IVec2> {
-        Self::region_3().map(|v| -v)
+        (5..9).flat_map(|x| (-4..(5 - x)).map(move |y| ivec2(x, y)))
     }
 }
 
@@ -112,31 +112,14 @@ impl Board {
         }
     }
 
-    pub fn fill(&mut self, mode: Mode) {
-        for v in self.backing.values_mut() {
-            *v = Player::None;
-        }
-        match mode {
-            Mode::Two => {
-                self.fill_area(
-                    Self::region_1()
-                        .chain(Self::region_2())
-                        .chain(Self::region_3()),
-                    Player::Player1,
-                );
-                self.fill_area(
-                    Self::region_4()
-                        .chain(Self::region_5())
-                        .chain(Self::region_6()),
-                    Player::Player2,
-                );
-            }
-            Mode::Three => {
-                self.fill_area(Self::region_1().chain(Self::region_2()), Player::Player1);
-                self.fill_area(Self::region_3().chain(Self::region_4()), Player::Player2);
-                self.fill_area(Self::region_5().chain(Self::region_6()), Player::Player3);
-            }
-        }
+    pub fn reset(&mut self) {
+        self.path.clear();
+        self.fill_area(Self::region_1(), Player::Player1);
+        self.fill_area(Self::region_2(), Player::Player2);
+        self.fill_area(Self::region_3(), Player::Player3);
+        self.fill_area(Self::region_4(), Player::Player4);
+        self.fill_area(Self::region_5(), Player::Player5);
+        self.fill_area(Self::region_6(), Player::Player6);
     }
 
     pub fn move_piece(&mut self, from: &IVec2, to: &IVec2) {

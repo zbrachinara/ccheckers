@@ -75,7 +75,7 @@ fn update(_app: &App, model: &mut Model, update: Update) {
             });
         if ui.button("Reset field").clicked() {
             model.mode = model.egui_data.mode;
-            model.board.fill(model.mode);
+            model.board.reset();
             model.turn = Player::Player1;
         }
 
