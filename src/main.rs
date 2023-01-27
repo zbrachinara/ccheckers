@@ -32,9 +32,15 @@ fn main() {
 }
 
 fn model(app: &App) -> Model {
+
+    app.set_exit_on_escape(false);
+
     let window_id = app
         .new_window()
         .view(window_handler)
+        .closed(|_, _: &mut Model| {
+            std::process::exit(0)
+        })
         .raw_event(raw_window_event)
         .build()
         .unwrap();
