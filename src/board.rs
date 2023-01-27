@@ -1,7 +1,12 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use nannou::{color::Alpha, prelude::*, state::Mouse};
+use nannou::{
+    color::{Alpha, Shade},
+    prelude::*,
+    state::Mouse,
+};
+use strum::IntoEnumIterator;
 
 use crate::{
     player::{Mode, Player},
@@ -230,15 +235,21 @@ impl Board {
         let hex = hex_coords.clone().take(6);
         draw.polygon().points(hex);
 
-        hex_coords.tuple_windows().take(6).for_each(|(a, b)| {
-            draw.polygon().color(STEELBLUE).points([a, b, a + b]);
-        });
+        hex_coords
+            .tuple_windows()
+            .take(6)
+            .zip(Player::iter().skip(1).map(rgb::Rgb::from))
+            .for_each(|((a, b), piece_kind)| {
+                draw.polygon()
+                    .color(piece_kind.lighten(0.1))
+                    .points([a, b, a + b]);
+            });
     }
 
     fn draw_pieces(&self, draw: &Draw) {
         for (pos, state) in &self.backing {
             draw.ellipse()
-                .color(Rgb::<u8>::from(*state))
+                .color(rgb::Rgb::from(*state))
                 .resolution(20.0)
                 .xy(Self::physical_position(pos))
                 .radius(Self::WIDTH)
