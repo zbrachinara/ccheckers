@@ -29,7 +29,7 @@ impl From<Player> for rgb::Rgb<Linear<srgb::Srgb>> {
             Player::None => DARKSLATEGRAY,
             Player::Player1 => DARKORCHID,
             Player::Player2 => FUCHSIA,
-            Player::Player3 => HONEYDEW,
+            Player::Player3 => YELLOWGREEN,
             Player::Player4 => MAROON,
             Player::Player5 => MIDNIGHTBLUE,
             Player::Player6 => OLIVE,
