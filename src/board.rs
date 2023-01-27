@@ -113,6 +113,7 @@ impl Board {
     }
 
     pub fn reset(&mut self) {
+        self.backing.values_mut().for_each(|p| *p = Piece::None);
         self.path.clear();
         self.fill_area(Self::region_1(), Piece::Player1);
         self.fill_area(Self::region_2(), Piece::Player2);
