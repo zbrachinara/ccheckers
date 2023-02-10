@@ -8,7 +8,7 @@ use nannou::{
 };
 use strum::IntoEnumIterator;
 
-use crate::{
+use super::{
     player::{Mode, Piece, Turn},
     HEX_SIZE,
 };
