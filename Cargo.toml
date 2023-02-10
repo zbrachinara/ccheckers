@@ -10,7 +10,7 @@ name = "ccheckers"
 path = "src/main.rs"
 
 [lib]
-name = "ccheckers"
+name = "ccheckers_wasm"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 
@@ -20,7 +20,7 @@ git = "https://github.com/nannou-org/nannou.git"
 rev = "287be8a4d075b17332ca0bf34649f5d25e751c00"
 features = [ "wasm-experimental" ]
 
-[dependencies.nannou_egui]
+[target."cfg(not(target_arch=\"wasm32\"))".dependencies.nannou_egui]
 version = "0.5.0"
 git = "https://github.com/nannou-org/nannou.git"
 rev = "287be8a4d075b17332ca0bf34649f5d25e751c00"
