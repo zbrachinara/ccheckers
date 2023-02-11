@@ -9,10 +9,24 @@
 
 <body>
     <script type="module">
-        let { default: init, main_web } = await import(new URL('ccheckers_wasm.js', import.meta.url))
+        let { default: init, main_web, Mode, signal_reset } = await import(new URL('ccheckers_wasm.js', import.meta.url))
+
+        function signal() {
+            let mode = document.getElementById("mode_dropdown").selectedOptions[0].innerHTML
+            signal_reset(Mode[mode])
+        }
+        document.getElementById("reset_button").onclick = signal
+
         await init()
         main_web()
     </script>
+    <label for="Players">#Players</label>
+    <select name="Players" id="mode_dropdown">
+        <option>Two</option>
+        <option>Three</option>
+        <option>Six</option>
+    </select>
+    <button id="reset_button">Reset</button>
 </body>
 
 </html>

@@ -1,9 +1,12 @@
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 use nannou::{
     color::encoding::{srgb, Linear},
     prelude::*,
 };
 use strum_macros::{Display, EnumIter};
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug, EnumIter, Display)]
 pub enum Mode {
     #[default]

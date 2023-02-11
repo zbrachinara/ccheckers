@@ -294,6 +294,7 @@ dependencies = [
  "itertools",
  "nannou",
  "nannou_egui",
+ "once_cell",
  "strum",
  "strum_macros",
  "wasm-bindgen",

@@ -8,6 +8,8 @@ mod board;
 #[cfg(not(target_arch = "wasm32"))]
 mod egui_defs;
 mod player;
+#[cfg(target_arch = "wasm32")]
+mod js_comms;
 
 const HEX_SIZE: f32 = 0.57;
 
@@ -86,7 +88,15 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
 
 pub fn update(_app: &App, model: &mut Model, update: Update) {
     #[cfg(not(target_arch = "wasm32"))]
-    egui_defs::define_ui(model, &update)
+    egui_defs::define_ui(model, &update);
+    #[cfg(target_arch = "wasm32")]
+    {
+        if let Some(mode) = js_comms::recieve_reset() {
+            model.mode = mode;
+            model.board.reset();
+            model.turn = Turn::Player1;
+        }
+    }
 }
 
 fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {

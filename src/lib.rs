@@ -15,6 +15,7 @@ pub async fn main_web() {
         app::Builder::new_async(|app| Box::new(common::model(app)))
             .backends(Backends::PRIMARY | Backends::GL)
             .event(common::events)
+            .update(common::update)
             .run_async()
             .await
     });
