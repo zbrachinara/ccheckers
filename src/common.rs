@@ -56,7 +56,8 @@ pub fn model(app: &App) -> Model {
 #[cfg(target_arch = "wasm32")]
 pub async fn model(app: &App) -> Model {
     app.set_exit_on_escape(false);
-    let winodw_id = window_builder(app).build_async().await.unwrap();
+    let window_id = window_builder(app).build_async().await.unwrap();
+    let window = app.window(window_id).unwrap();
     Model::default()
 }
 
