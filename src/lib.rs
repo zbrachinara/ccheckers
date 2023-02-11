@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use async_std::task::block_on;
 use wasm_bindgen::prelude::wasm_bindgen;
 
