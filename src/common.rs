@@ -1,10 +1,12 @@
 use board::Board;
 use nannou::prelude::*;
-use nannou_egui::{egui, Egui};
+#[cfg(not(target_arch = "wasm32"))]
+use nannou_egui::Egui;
 use player::{Mode, Turn};
-use strum::IntoEnumIterator;
 
 mod board;
+#[cfg(not(target_arch = "wasm32"))]
+mod egui_defs;
 mod player;
 
 const HEX_SIZE: f32 = 0.57;
@@ -22,6 +24,7 @@ struct EguiData {
 pub struct Model {
     board: Board,
     turn: Turn,
+    #[cfg(not(target_arch = "wasm32"))]
     egui: Egui,
     egui_data: EguiData,
     mode: Mode,
@@ -42,6 +45,7 @@ pub fn model(app: &App) -> Model {
     Model {
         board: Default::default(),
         turn: Default::default(),
+        #[cfg(not(target_arch = "wasm32"))]
         egui: Egui::from_window(&window),
         egui_data: Default::default(),
         mode: Default::default(),
@@ -55,40 +59,17 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     let draw = app.draw().scale_axes(Vec3::splat(viewport_size));
     m.board.draw(app, &draw);
     draw.to_frame(app, &f).unwrap();
+    #[cfg(not(target_arch = "wasm32"))]
     m.egui.draw_to_frame(&f).unwrap();
 }
 
 pub fn update(_app: &App, model: &mut Model, update: Update) {
-    let Model { ref mut egui, .. } = *model;
-
-    egui.set_elapsed_time(update.since_start);
-    let ctx = egui.begin_frame();
-    // define ui
-    egui::Window::new("ChuFEUNieSE CHEikcERsS????").show(&ctx, |ui| {
-        ui.label("Controls:");
-        ui.label("Click positions to begin a move");
-        ui.label("Left arrow to undo part of a move");
-        ui.label("Press enter to finish a move");
-        egui::ComboBox::from_label("#Players")
-            .selected_text(format!("{}", model.egui_data.mode))
-            .show_ui(ui, |ui| {
-                for mode in Mode::iter() {
-                    ui.selectable_value(&mut model.egui_data.mode, mode, format!("{mode}"));
-                }
-            });
-        if ui.button("Reset field").clicked() {
-            model.mode = model.egui_data.mode;
-            model.board.reset();
-            model.turn = Turn::Player1;
-        }
-
-        if model.turn != Turn::None {
-            ui.label(format!("Currently {}'s turn", model.turn));
-        }
-    });
+    #[cfg(not(target_arch = "wasm32"))]
+    egui_defs::define_ui(model, &update)
 }
 
 fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {
+    #[cfg(not(target_arch = "wasm32"))]
     model.egui.handle_raw_event(event);
 }
 
