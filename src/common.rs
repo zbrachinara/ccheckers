@@ -55,8 +55,20 @@ pub fn model(app: &App) -> Model {
 }
 #[cfg(target_arch = "wasm32")]
 pub async fn model(app: &App) -> Model {
-    app.set_exit_on_escape(false);
-    let window_id = window_builder(app).build_async().await.unwrap();
+    use nannou::wgpu::{DeviceDescriptor, Limits};
+    let device_descriptor = DeviceDescriptor {
+        limits: Limits {
+            max_texture_dimension_2d: 8192,
+            ..Limits::downlevel_webgl2_defaults()
+        },
+        ..Default::default()
+    };
+    let window_id = window_builder(app)
+        .device_descriptor(device_descriptor)
+        .build_async()
+        .await
+        .unwrap();
+
     let window = app.window(window_id).unwrap();
     Model::default()
 }

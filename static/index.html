@@ -9,7 +9,7 @@
 
 <body>
     <script type="module">
-        let {default: init, main_web }= await import(new URL('ccheckers_wasm.js', import.meta.url))
+        let { default: init, main_web } = await import(new URL('ccheckers_wasm.js', import.meta.url))
         await init()
         main_web()
     </script>
