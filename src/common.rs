@@ -21,6 +21,7 @@ struct EguiData {
     mode: Mode,
 }
 
+#[cfg_attr(target_arch = "wasm32", derive(Default))]
 pub struct Model {
     board: Board,
     turn: Turn,
@@ -30,26 +31,33 @@ pub struct Model {
     mode: Mode,
 }
 
-pub fn model(app: &App) -> Model {
-    app.set_exit_on_escape(false);
-
-    let window_id = app
-        .new_window()
+pub fn window_builder(app: &App) -> window::Builder<'_> {
+    app.new_window()
         .view(window_handler)
         .closed(|_, _: &mut Model| std::process::exit(0))
         .raw_event(raw_window_event)
-        .build()
-        .unwrap();
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn model(app: &App) -> Model {
+    app.set_exit_on_escape(false);
+
+    let window_id = window_builder(app).build().unwrap();
     let window = app.window(window_id).unwrap();
 
     Model {
         board: Default::default(),
         turn: Default::default(),
-        #[cfg(not(target_arch = "wasm32"))]
         egui: Egui::from_window(&window),
         egui_data: Default::default(),
         mode: Default::default(),
     }
+}
+#[cfg(target_arch = "wasm32")]
+pub async fn model(app: &App) -> Model {
+    app.set_exit_on_escape(false);
+    let winodw_id = window_builder(app).build_async().await.unwrap();
+    Model::default()
 }
 
 fn window_handler(app: &App, m: &Model, f: Frame) {
