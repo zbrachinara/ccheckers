@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Checkers (nannou)</title>
+</head>
+
+<body>
+    <script type="module">
+        let {default: init, main_web }= await import(new URL('ccheckers_wasm.js', import.meta.url))
+        await init()
+        main_web()
+    </script>
+</body>
+
+</html>

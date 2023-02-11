@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cargo",
+            "command": "build",
+            "label": "compile web",
+            "args": [
+                "--target",
+                "wasm32-unknown-unknown"
+            ],
+        },
+        {
+            "type": "shell",
+            "dependsOn": "compile web",
+            "label": "build web",
+            "command": "wasm-bindgen --no-typescript --out-dir static --target web ./target/wasm32-unknown-unknown/debug/ccheckers_wasm.wasm"
+        },
+    ],
+}
