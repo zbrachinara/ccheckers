@@ -1,4 +1,4 @@
-#![allow(unused)]
+#![cfg(target_arch = "wasm32")]
 
 use async_std::task::block_on;
 use nannou::{prelude::*, wgpu::Backends};
@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 mod common;
 
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn main_web() {
     #[cfg(debug_assertions)]
