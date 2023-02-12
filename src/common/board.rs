@@ -32,6 +32,8 @@ fn divide(v1: IVec2, v2: IVec2) -> Option<i32> {
 pub struct Board {
     backing: HashMap<IVec2, Piece>,
     path: Vec<IVec2>,
+    pub turn: Turn,
+    pub mode: Mode,
 }
 
 impl Default for Board {
@@ -51,6 +53,8 @@ impl Default for Board {
                     .collect()
             },
             path: Default::default(),
+            turn: Turn::default(),
+            mode: Mode::default(),
         }
     }
 }
@@ -112,7 +116,8 @@ impl Board {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self, mode: Mode) {
+        self.mode = mode;
         self.backing.values_mut().for_each(|p| *p = Piece::None);
         self.path.clear();
         self.fill_area(Self::region_1(), Piece::Player1);
@@ -121,6 +126,7 @@ impl Board {
         self.fill_area(Self::region_4(), Piece::Player4);
         self.fill_area(Self::region_5(), Piece::Player5);
         self.fill_area(Self::region_6(), Piece::Player6);
+        self.turn = Turn::Player1
     }
 
     pub fn move_piece(&mut self, from: &IVec2, to: &IVec2) {
@@ -150,7 +156,7 @@ impl Board {
 
     /// Checks if jumping from the first to the second position is legal, taking into account the
     /// rest of the path. Both positions given must be valid positions on the board.
-    pub fn is_legal(&self, new: IVec2, turn: Turn, mode: Mode) -> bool {
+    pub fn is_legal(&self, new: IVec2) -> bool {
         if let Some(&starts) = self.path.last() {
             self.backing.get(&new).unwrap().is_none()
                 && match Self::cardinal_distance(starts, new) {
@@ -171,12 +177,14 @@ impl Board {
                     _ => false,
                 }
         } else {
-            self.get(&new).map(|p| turn.owns(p, mode)).unwrap_or(false)
+            self.get(&new)
+                .map(|p| self.turn.owns(p, self.mode))
+                .unwrap_or(false)
         }
     }
 
-    pub fn try_push_path(&mut self, new: IVec2, turn: Turn, mode: Mode) -> bool {
-        if self.is_legal(new, turn, mode) {
+    pub fn try_push_path(&mut self, new: IVec2) -> bool {
+        if self.is_legal(new) {
             self.path.push(new);
             true
         } else {
@@ -190,15 +198,14 @@ impl Board {
 
     /// If the path is long enough to move, does the move and returns true. Otherwise does nothing
     /// and returns false.
-    pub fn commit_path(&mut self) -> bool {
+    pub fn commit_path(&mut self) {
         if self.path.len() > 1 {
             let (first, last) = (*self.path.first().unwrap(), *self.path.last().unwrap());
             self.move_piece(&first, &last);
             self.path.clear();
-            true
-        } else {
-            false
-        }
+            self.turn = self.mode.next_turn(self.turn);
+          
+        } 
     }
 }
 

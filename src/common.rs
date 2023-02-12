@@ -21,12 +21,10 @@ fn viewport_size(app: &App) -> f32 {
 #[cfg_attr(target_arch = "wasm32", derive(Default))]
 pub struct Model {
     board: Board,
-    turn: Turn,
     #[cfg(not(target_arch = "wasm32"))]
     egui: Egui,
     #[cfg(not(target_arch = "wasm32"))]
     egui_data: egui_defs::EguiData,
-    mode: Mode,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -86,9 +84,7 @@ pub fn update(_app: &App, model: &mut Model, _update: Update) {
     #[cfg(target_arch = "wasm32")]
     {
         if let Some(mode) = js_comms::recieve_reset() {
-            model.mode = mode;
-            model.board.reset();
-            model.turn = Turn::Player1;
+            model.board.reset(mode);
         }
     }
 }
@@ -107,14 +103,10 @@ pub fn events(app: &App, m: &mut Model, e: Event) {
         match ev {
             WindowEvent::MousePressed(MouseButton::Left) => {
                 if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
-                    m.board.try_push_path(position, m.turn, m.mode);
+                    m.board.try_push_path(position);
                 }
             }
-            WindowEvent::KeyPressed(Key::Return) => {
-                if m.board.commit_path() {
-                    m.turn = m.mode.next_turn(m.turn)
-                }
-            }
+            WindowEvent::KeyPressed(Key::Return) => m.board.commit_path(),
             WindowEvent::KeyPressed(Key::Left) => m.board.pop_path(),
             _ => (),
         }
