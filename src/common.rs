@@ -7,9 +7,9 @@ use player::{Mode, Turn};
 mod board;
 #[cfg(not(target_arch = "wasm32"))]
 mod egui_defs;
-mod player;
 #[cfg(target_arch = "wasm32")]
 mod js_comms;
+mod player;
 
 const HEX_SIZE: f32 = 0.57;
 
@@ -18,33 +18,28 @@ fn viewport_size(app: &App) -> f32 {
     f32::min(window_bounds.w(), window_bounds.h()) / 2.
 }
 
-#[derive(Default)]
-struct EguiData {
-    mode: Mode,
-}
-
 #[cfg_attr(target_arch = "wasm32", derive(Default))]
 pub struct Model {
     board: Board,
     turn: Turn,
     #[cfg(not(target_arch = "wasm32"))]
     egui: Egui,
-    egui_data: EguiData,
+    #[cfg(not(target_arch = "wasm32"))]
+    egui_data: egui_defs::EguiData,
     mode: Mode,
-}
-
-pub fn window_builder(app: &App) -> window::Builder<'_> {
-    app.new_window()
-        .view(window_handler)
-        .closed(|_, _: &mut Model| std::process::exit(0))
-        .raw_event(raw_window_event)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn model(app: &App) -> Model {
     app.set_exit_on_escape(false);
 
-    let window_id = window_builder(app).build().unwrap();
+    let window_id = app
+        .new_window()
+        .view(window_handler)
+        .closed(|_, _: &mut Model| std::process::exit(0))
+        .raw_event(raw_window_event)
+        .build()
+        .unwrap();
     let window = app.window(window_id).unwrap();
 
     Model {
@@ -65,13 +60,12 @@ pub async fn model(app: &App) -> Model {
         },
         ..Default::default()
     };
-    let window_id = window_builder(app)
+    app.new_window()
         .device_descriptor(device_descriptor)
+        .view(window_handler)
         .build_async()
         .await
         .unwrap();
-
-    let window = app.window(window_id).unwrap();
     Model::default()
 }
 
@@ -86,9 +80,9 @@ fn window_handler(app: &App, m: &Model, f: Frame) {
     m.egui.draw_to_frame(&f).unwrap();
 }
 
-pub fn update(_app: &App, model: &mut Model, update: Update) {
+pub fn update(_app: &App, model: &mut Model, _update: Update) {
     #[cfg(not(target_arch = "wasm32"))]
-    egui_defs::define_ui(model, &update);
+    egui_defs::define_ui(model, &_update);
     #[cfg(target_arch = "wasm32")]
     {
         if let Some(mode) = js_comms::recieve_reset() {
@@ -99,8 +93,8 @@ pub fn update(_app: &App, model: &mut Model, update: Update) {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {
-    #[cfg(not(target_arch = "wasm32"))]
     model.egui.handle_raw_event(event);
 }
 

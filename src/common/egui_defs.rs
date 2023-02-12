@@ -6,6 +6,11 @@ use nannou::prelude::*;
 use nannou_egui::egui;
 use strum::IntoEnumIterator;
 
+#[derive(Default)]
+pub struct EguiData {
+    mode: Mode,
+}
+
 pub fn define_ui(model: &mut Model, update: &Update) {
     let Model { ref mut egui, .. } = *model;
     egui.set_elapsed_time(update.since_start);
