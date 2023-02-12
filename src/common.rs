@@ -100,29 +100,23 @@ fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event:
 
 pub fn events(app: &App, m: &mut Model, e: Event) {
     #[allow(clippy::single_match)]
-    match e {
-        Event::WindowEvent {
-            simple: Some(WindowEvent::MousePressed(MouseButton::Left)),
-            ..
-        } => {
-            if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
-                m.board.try_push_path(position, m.turn, m.mode);
+    if let Event::WindowEvent {
+        simple: Some(ev), ..
+    } = e
+    {
+        match ev {
+            WindowEvent::MousePressed(MouseButton::Left) => {
+                if let Some(position) = m.board.position_of(&app.mouse, viewport_size(app)) {
+                    m.board.try_push_path(position, m.turn, m.mode);
+                }
             }
-        }
-        Event::WindowEvent {
-            simple: Some(WindowEvent::KeyPressed(Key::Return)),
-            ..
-        } => {
-            if m.board.commit_path() {
-                m.turn = m.mode.next_turn(m.turn)
+            WindowEvent::KeyPressed(Key::Return) => {
+                if m.board.commit_path() {
+                    m.turn = m.mode.next_turn(m.turn)
+                }
             }
+            WindowEvent::KeyPressed(Key::Left) => m.board.pop_path(),
+            _ => (),
         }
-        Event::WindowEvent {
-            simple: Some(WindowEvent::KeyPressed(Key::Left)),
-            ..
-        } => {
-            m.board.pop_path();
-        }
-        _ => (),
     }
 }
