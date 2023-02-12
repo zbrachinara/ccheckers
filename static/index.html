@@ -9,17 +9,48 @@
 
 <body>
     <script type="module">
-        let { default: init, main_web, Mode, signal_reset } = await import(new URL('ccheckers_wasm.js', import.meta.url))
+        let { default: init, main_web, Mode, signal_reset, request_load, request_store} =
+            await import(new URL('ccheckers_wasm.js', import.meta.url))
 
-        function signal() {
+        // https://stackoverflow.com/a/18197341 CC-BY-SA
+        function download(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            // element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            // document.body.removeChild(element);
+        }
+
+        document.getElementById("reset_button").onclick = () => {
             let mode = document.getElementById("mode_dropdown").selectedOptions[0].innerHTML
             signal_reset(Mode[mode])
+        };
+
+        document.getElementById("load_button").onclick = async () => {
+            document.getElementById("load_file").click()
         }
-        document.getElementById("reset_button").onclick = signal
+        document.getElementById("load_file").addEventListener("change", async (ev) => {
+            let data = await ev.target.files[0].text()
+            request_load(data)
+        })
+
+        document.getElementById("save_button").onclick = async () => {
+            let data = await request_store()
+            console.log(data)
+            download("unnamed_ccheckers_game.ron", data)
+        }
 
         await init()
         main_web()
     </script>
+
+    <input type="file" id="load_file" style="display: none">
+
     <label for="Players">#Players</label>
     <select name="Players" id="mode_dropdown">
         <option>Two</option>
@@ -27,6 +58,8 @@
         <option>Six</option>
     </select>
     <button id="reset_button">Reset</button>
+    <button id="load_button">Load game</button>
+    <button id="save_button">Save game</button>
 </body>
 
 </html>

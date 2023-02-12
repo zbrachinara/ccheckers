@@ -83,6 +83,7 @@ pub fn update(_app: &App, model: &mut Model, _update: Update) {
         if let Some(mode) = js_comms::recieve_reset() {
             model.board.reset(mode);
         }
+        js_comms::respond_load_request(model);
     }
 }
 
