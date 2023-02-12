@@ -204,8 +204,7 @@ impl Board {
             self.move_piece(&first, &last);
             self.path.clear();
             self.turn = self.mode.next_turn(self.turn);
-          
-        } 
+        }
     }
 }
 
@@ -213,12 +212,12 @@ impl Board {
     const HIGHLIGHT_WIDTH: f32 = Self::WIDTH + Self::BASE_SPACING / 5.0;
 
     pub fn draw(&self, app: &App, draw: &Draw) {
-        Self::draw_board_background(draw);
+        self.draw_board_background(draw);
         self.draw_pieces(draw);
         self.draw_path(draw);
     }
 
-    fn draw_board_background(draw: &Draw) {
+    fn draw_board_background(&self, draw: &Draw) {
         let hex_coords = (0..)
             .map(|i| f32::PI() * i as f32 / 3.0)
             .map(|rad| pt2(rad.cos(), rad.sin()) * HEX_SIZE);
@@ -229,11 +228,18 @@ impl Board {
         hex_coords
             .tuple_windows()
             .take(6)
-            .zip(Piece::iter().skip(1).map(rgb::Rgb::from))
+            .zip(Piece::iter().skip(1))
             .for_each(|((a, b), piece_kind)| {
-                draw.polygon()
-                    .color(piece_kind.lighten(0.1))
-                    .points([a, b, a + b]);
+                let piece_color = rgb::Rgb::from(piece_kind);
+                let triangle = draw
+                    .tri()
+                    .color(piece_color.lighten(0.1))
+                    .points(a, b, a + b);
+                if self.turn.owns(piece_kind, self.mode) {
+                    triangle
+                        .stroke(piece_color.darken(0.2))
+                        .stroke_weight(0.005);
+                }
             });
     }
 
