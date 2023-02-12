@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 use nannou::{
@@ -7,7 +8,7 @@ use nannou::{
 use strum_macros::{Display, EnumIter};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug, EnumIter, Display)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug, EnumIter, Display, Serialize, Deserialize)]
 pub enum Mode {
     #[default]
     Two,
@@ -15,7 +16,7 @@ pub enum Mode {
     Six,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Display)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Display, Serialize, Deserialize)]
 pub enum Turn {
     #[default]
     None,
@@ -63,7 +64,7 @@ impl Turn {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Display, EnumIter)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Display, EnumIter, Serialize, Deserialize)]
 pub enum Piece {
     #[default]
     None,

@@ -6,6 +6,7 @@ use nannou::{
     prelude::*,
     state::Mouse,
 };
+use serde::{Serialize, Deserialize};
 use strum::IntoEnumIterator;
 
 use super::{
@@ -29,6 +30,7 @@ fn divide(v1: IVec2, v2: IVec2) -> Option<i32> {
 /// there, the point (0, 4) is in the top right corner within the central hexagon, while (0, -4) is
 /// in the bottom left corner of the hexagon. Similarly, the point at (4, 0) is at the right, while
 /// (-4, 0) is in the left. By this, the top left is at (-4, 4) and the bottom right is at (4, -4)
+#[derive(Serialize, Deserialize)]
 pub struct Board {
     backing: HashMap<IVec2, Piece>,
     path: Vec<IVec2>,
