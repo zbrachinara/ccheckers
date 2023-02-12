@@ -9,7 +9,7 @@
 
 <body>
     <script type="module">
-        let { default: init, main_web, Mode, signal_reset, request_load, request_store} =
+        let { default: init, main_web, Mode, signal_reset, request_load, request_store } =
             await import(new URL('ccheckers_wasm.js', import.meta.url))
 
         // https://stackoverflow.com/a/18197341 CC-BY-SA
@@ -49,17 +49,19 @@
         main_web()
     </script>
 
-    <input type="file" id="load_file" style="display: none">
+    <div>
+        <input type="file" id="load_file" style="display: none">
 
-    <label for="Players">#Players</label>
-    <select name="Players" id="mode_dropdown">
-        <option>Two</option>
-        <option>Three</option>
-        <option>Six</option>
-    </select>
-    <button id="reset_button">Reset</button>
-    <button id="load_button">Load game</button>
-    <button id="save_button">Save game</button>
+        <label for="Players">#Players</label>
+        <select name="Players" id="mode_dropdown">
+            <option>Two</option>
+            <option>Three</option>
+            <option>Six</option>
+        </select>
+        <button id="reset_button">Reset</button>
+        <button id="load_button">Load game</button>
+        <button id="save_button">Save game</button>
+    </div>
 </body>
 
 </html>
