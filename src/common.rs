@@ -2,7 +2,6 @@ use board::Board;
 use nannou::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use nannou_egui::Egui;
-use player::{Mode, Turn};
 
 mod board;
 #[cfg(not(target_arch = "wasm32"))]
@@ -42,10 +41,8 @@ pub fn model(app: &App) -> Model {
 
     Model {
         board: Default::default(),
-        turn: Default::default(),
         egui: Egui::from_window(&window),
         egui_data: Default::default(),
-        mode: Default::default(),
     }
 }
 #[cfg(target_arch = "wasm32")]

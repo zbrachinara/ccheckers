@@ -29,13 +29,11 @@ pub fn define_ui(model: &mut Model, update: &Update) {
                 }
             });
         if ui.button("Reset field").clicked() {
-            model.mode = model.egui_data.mode;
-            model.board.reset();
-            model.turn = Turn::Player1;
+            model.board.reset(model.egui_data.mode);
         }
 
-        if model.turn != Turn::None {
-            ui.label(format!("Currently {}'s turn", model.turn));
+        if model.board.turn != Turn::None {
+            ui.label(format!("Currently {}'s turn", model.board.turn));
         }
     });
 }
