@@ -7,7 +7,7 @@ Small chinese checkers implementation with nannou
 
 Both platforms assume that you have cargo installed.
 
-For native (Linux/Mac/Windows assuming no cross-compilation): Run `cargo build --release, then get the executable
+For native (Linux/Mac/Windows assuming no cross-compilation): Run `cargo build --release`, then get the executable
 from `./target/release/ccheckers(.exe)`
 
 For web (a `.vscode/tasks.json` task is provided for convenience for steps 2-3):
